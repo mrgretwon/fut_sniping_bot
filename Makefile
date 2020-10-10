@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 .PHONY: run
-PYTHONPATH=.
+export PYTHONPATH=.
 
 run:
 	find -name '*.pyc' -delete

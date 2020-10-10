@@ -7,7 +7,8 @@ pip install -r requirements.txt
 ```
 Make sure you also have mpg123 package installed.
 ## Configuration
-Provide your credentials in config.py file
+Everything is configured using config.py file.
+Provide your credentials
 
 ```
 USER = {
@@ -16,11 +17,14 @@ USER = {
 }
 ```
 
-In main.py file enter the name of the player name and the maximum cost you want to spend for him.
+Enter the name of the player name and the maximum cost you want to spend for him.
 Example:
 
 ```
-bot.buy_player("Rooney", 600)
+PLAYER = {
+    "name": "Sterling",
+    "cost": 100000,
+}
 ```
 
 ## Running

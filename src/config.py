@@ -29,4 +29,9 @@ USER = {
     "password": "your_password",
 }
 
+PLAYER = {
+    "name": "Sterling",
+    "cost": 100001,
+}
+
 ALLOW_NOTIFICATIONS = True
