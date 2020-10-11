@@ -15,9 +15,7 @@ def create_driver():
     driver = webdriver.Chrome(
         executable_path=path
     )
-
-    driver.set_window_position(0, 0)
-    driver.set_window_size(1920, 1080)
+    driver.maximize_window()
 
     return driver
 
@@ -30,8 +28,8 @@ USER = {
 }
 
 PLAYER = {
-    "name": "Sterling",
-    "cost": 100001,
+    "name": "Upamecano",
+    "cost": 16000,
 }
 
-ALLOW_NOTIFICATIONS = True
+ALLOW_NOTIFICATIONS = False
