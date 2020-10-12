@@ -3,6 +3,8 @@
 
 ## How it works
 
+![](demo.gif)
+
 Bot uses selenium framework to run fut web app. This is the best way to not get banned, because it is very similar to a normal user activity.
 
 First step is logging in. Bot have access to your email inbox, so it can read the newest ea message with an access code.
