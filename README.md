@@ -1,4 +1,4 @@
-# FUT Sniping BOT - FIFA 21
+# FUT Sniping BOT - FIFA 21 Autobuyer
 
 
 ## How it works
