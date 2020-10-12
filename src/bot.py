@@ -2,14 +2,15 @@ import os
 from time import sleep
 
 from gtts import gTTS
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 
-from src.config import create_driver, ALLOW_NOTIFICATIONS
+from src.config import create_driver, ALLOW_NOTIFICATIONS, INCREASE_COUNT
 from src.config import URL
+from src.email_manager import get_access_code
 from src.helpers import wait_for_shield_invisibility
 
 
@@ -48,9 +49,12 @@ class Bot:
             EC.element_to_be_clickable((By.ID, 'btnSendCode'))
         ).click()
 
-        print("You have 5 minutes for providing access code.\nWaiting...")
+        access_code = get_access_code()
 
-        WebDriverWait(self.driver, 300).until(
+        self.driver.find_element(By.ID, 'oneTimeCode').send_keys(access_code)
+        self.driver.find_element(By.ID, 'btnSubmit').click()
+
+        WebDriverWait(self.driver, 30).until(
             EC.visibility_of_element_located((By.CLASS_NAME, 'icon-transfer'))
         )
         sleep(2)
@@ -66,11 +70,12 @@ class Bot:
 
     def search_player(self, player, max_price):
         count = 1
+        success_count = 0
         coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
         print("Number of coins: " + coins)
 
-        while int(coins) >= max_price:
-            if count % 10 == 0:
+        while int(coins) >= max_price and success_count < 5:
+            if count % INCREASE_COUNT == 0:
                 min_price_input = self.driver.find_element(By.XPATH, '(//input[contains(@class, "numericInput")])[3]')
                 min_price_input.click()
                 sleep(0.05)
@@ -81,7 +86,14 @@ class Bot:
                                                                     d.find_elements(By.CLASS_NAME, 'DetailView'))[0]
 
             if "DetailView" in result.get_attribute("class"):
-                self.driver.find_element(By.XPATH, '//button[contains(@class, "buyButton")]').click()
+                coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
+
+                try:
+                    self.driver.find_element(By.XPATH, '//button[contains(@class, "buyButton")]').click()
+                except WebDriverException:
+                    wait_for_shield_invisibility(self.driver, 0.1)
+                    self.driver.find_element(By.XPATH, '//button[contains(@class, "buyButton")]').click()
+
                 self.driver.find_element(By.XPATH, '//div[contains(@class,"view-modal-container")]//button').click()
 
                 sleep(0.5)
@@ -89,14 +101,19 @@ class Bot:
                 new_coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
 
                 if int(coins) == int(new_coins):
-                    print("Found something, but it was too slow.")
+                    print("Found something, but it was too late.")
                 else:
                     price = int(coins) - int(new_coins)
                     print("Success! You bought " + player + " for " + str(price) + " coins.")
                     coins = new_coins
+                    success_count += 1
                     self.read("Success")
 
-            self.driver.find_element(By.XPATH, '//button[contains(@class, "ut-navigation-button-control")]').click()
+            try:
+                self.driver.find_element(By.XPATH, '//button[contains(@class, "ut-navigation-button-control")]').click()
+            except WebDriverException:
+                wait_for_shield_invisibility(self.driver, 0.1)
+                self.driver.find_element(By.XPATH, '//button[contains(@class, "ut-navigation-button-control")]').click()
 
             inc_max_price_button = self.driver.find_element(By.XPATH, '(//div[@class="price-filter"]//button)[6]')
 
@@ -107,11 +124,13 @@ class Bot:
             wait_for_shield_invisibility(self.driver)
 
             inc_max_price_button.click()
-            inc_max_price_button.click()
 
             count += 1
 
-        print("You have no coins for more players.")
+        if success_count == 5:
+            print("You bought 5 players. Assign them and rerun the bot.")
+        else:
+            print("You have no coins for more players.")
 
     def buy_player(self, player, max_price):
         try:

@@ -1,14 +1,36 @@
-# FUT Sniping BOT
+# FUT Sniping BOT - FIFA 21
+
+
+## How it works
+
+Bot uses selenium framework to run fut web app. This is the best way to not get banned, because it is very similar to a normal user activity.
+
+First step is logging in. Bot have access to your email inbox, so it can read the newest ea message with an access code.
+After running the web app, your filters are used to find a player (name and max price). 
+
+The min price is increased before every search to have the results refreshed every time. 
+By default bot clicks **+** button of min price 20 times, and starts again from 0.
+You can change the number of increases using `INCREASE_COUNT` variable in the `config.py` file.
+
+When the player is found, bot buys him, but sometimes it's too late. The result appears in the console:
+- **Success**: *"Success! You bought player_name for X coins."*
+- **Failed**: *"Found something, but it was too late."*
+
+The bot stops working when you have no more money, or after 5 bought players (because you have to assign them, the feature is not done yet).
+
+The current status is described in the console logs, so you have real-time access to information about the activities performed.
 
 ## Install requirements
 
 ```
 pip install -r requirements.txt
 ```
-Make sure you also have mpg123 package installed.
+Make sure you also have `mpg123` package installed.
+
 ## Configuration
-Everything is configured using config.py file.
-Provide your credentials
+
+Everything is configured using `config.py` file.
+Provide your credentials:
 
 ```
 USER = {
@@ -17,7 +39,17 @@ USER = {
 }
 ```
 
-Enter the name of the player name and the maximum cost you want to spend for him.
+You have to also provide your email credentials. It's needed to check the access code sent to your email address. 
+**Remember to allow external tools in your mail configuration.**
+
+```
+EMAIL_CREDENTIALS = {
+    "email": "your_email@example.com",
+    "password": "your_password",
+}
+```
+
+Enter the name of the player name and the maximum number of coins you want to spend for him.
 Example:
 
 ```
@@ -27,12 +59,25 @@ PLAYER = {
 }
 ```
 
+You can turn on voice notification when you find a player.
+
+```
+ALLOW_NOTIFICATIONS = True
+```
+
 ## Running
 
 ```
 make run
 ```
 
-After logging in, you have to provide access code by yourself.
+
+## Info
+
+Currently it works only Linux and Mac systems.
+
+It's just first version of fut web app bot. The project will be further developed and new features will appear.
+ 
+Good luck!
 
 

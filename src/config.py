@@ -28,8 +28,17 @@ USER = {
 }
 
 PLAYER = {
-    "name": "Upamecano",
-    "cost": 16000,
+    "name": "ndombele",
+    "cost": 5500,
 }
 
+EMAIL_CREDENTIALS = {
+    "email": "your_email@example.com",
+    "password": "your_password",
+}
+
+EA_EMAIL = "EA@e.ea.com"
+
 ALLOW_NOTIFICATIONS = False
+
+INCREASE_COUNT = 20
