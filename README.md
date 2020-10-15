@@ -61,12 +61,6 @@ PLAYER = {
 }
 ```
 
-You can turn on voice notification when you find a player.
-
-```
-ALLOW_NOTIFICATIONS = True
-```
-
 ## Running
 
 ```

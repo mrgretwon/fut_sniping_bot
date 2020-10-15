@@ -1,5 +1,6 @@
 from selenium import webdriver
 import platform
+import os
 
 
 def create_driver():
@@ -10,7 +11,7 @@ def create_driver():
     elif system == 'Linux':
         path = 'chrome_linux/chromedriver'
     elif system == 'Windows':
-        path = 'chrome_windows/chromedriver,exe'
+        path = os.getcwd() + '\chrome_windows\chromedriver.exe'
     else:
         raise OSError(f'Operating system {system} is not supported')
 
@@ -40,7 +41,5 @@ EMAIL_CREDENTIALS = {
 }
 
 EA_EMAIL = "EA@e.ea.com"
-
-ALLOW_NOTIFICATIONS = False
 
 INCREASE_COUNT = 20
