@@ -10,3 +10,7 @@ def wait_for_shield_invisibility(driver, duration=0.25):
         EC.invisibility_of_element_located((By.CLASS_NAME, 'ut-click-shield showing interaction'))
     )
     sleep(duration)
+
+
+class MarketError(Exception):
+    pass

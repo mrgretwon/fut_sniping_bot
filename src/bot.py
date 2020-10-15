@@ -11,7 +11,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from src.config import create_driver, ALLOW_NOTIFICATIONS, INCREASE_COUNT
 from src.config import URL
 from src.email_manager import get_access_code
-from src.helpers import wait_for_shield_invisibility
+from src.helpers import wait_for_shield_invisibility, MarketError
 
 
 class Bot:
@@ -28,6 +28,9 @@ class Bot:
             message.save("message.mp3")
             os.system("mpg123 message.mp3")
             os.system("rm message.mp3")
+
+    def quit(self):
+        self.driver.quit()
 
     def login(self, user):
         WebDriverWait(self.driver, 15).until(
@@ -70,11 +73,10 @@ class Bot:
 
     def search_player(self, player, max_price):
         count = 1
-        success_count = 0
         coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
         print("Number of coins: " + coins)
 
-        while int(coins) >= max_price and success_count < 5:
+        while int(coins) >= max_price:
             if count % INCREASE_COUNT == 0:
                 min_price_input = self.driver.find_element(By.XPATH, '(//input[contains(@class, "numericInput")])[3]')
                 min_price_input.click()
@@ -82,9 +84,11 @@ class Bot:
                 min_price_input.send_keys(0)
 
             self.driver.find_element(By.XPATH, '(//*[@class="button-container"]/button)[2]').click()
-            result = WebDriverWait(self.driver, 10).until(lambda d: d.find_elements(By.CLASS_NAME, 'no-results-icon') or
-                                                                    d.find_elements(By.CLASS_NAME, 'DetailView'))[0]
+            result = WebDriverWait(self.driver, 10).until(lambda d:
+                                                          d.find_elements(By.CLASS_NAME, 'no-results-icon') or
+                                                          d.find_elements(By.CLASS_NAME, 'DetailView'))[0]
 
+            # Buy a player when result appears
             if "DetailView" in result.get_attribute("class"):
                 coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
 
@@ -95,19 +99,25 @@ class Bot:
                     self.driver.find_element(By.XPATH, '//button[contains(@class, "buyButton")]').click()
 
                 self.driver.find_element(By.XPATH, '//div[contains(@class,"view-modal-container")]//button').click()
-
-                sleep(0.5)
+                wait_for_shield_invisibility(self.driver)
 
                 new_coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
 
                 if int(coins) == int(new_coins):
                     print("Found something, but it was too late.")
                 else:
+                    WebDriverWait(self.driver, 10).until(
+                        EC.element_to_be_clickable(
+                            (By.XPATH, '(//div[@class="DetailPanel"]/div[@class="ut-button-group"]/button)[8]'))
+                    ).click()
                     price = int(coins) - int(new_coins)
                     print("Success! You bought " + player + " for " + str(price) + " coins.")
                     coins = new_coins
-                    success_count += 1
                     self.read("Success")
+
+            # Wait 5 minutes if transfer market doesn't work
+            if "Notification negative" in result.get_attribute("class"):
+                raise MarketError
 
             try:
                 self.driver.find_element(By.XPATH, '//button[contains(@class, "ut-navigation-button-control")]').click()
@@ -127,39 +137,42 @@ class Bot:
 
             count += 1
 
-        if success_count == 5:
-            print("You bought 5 players. Assign them and rerun the bot.")
-        else:
-            print("You have no coins for more players.")
+        print("You have no coins for more players.")
+        return True
 
     def buy_player(self, player, max_price):
-        try:
-            self.go_to_transfer_market()
+        while True:
+            try:
+                self.go_to_transfer_market()
 
-            WebDriverWait(self.driver, 10).until(
-                EC.visibility_of_element_located((By.CLASS_NAME, 'ut-player-search-control'))
-            )
-            wait_for_shield_invisibility(self.driver)
+                WebDriverWait(self.driver, 10).until(
+                    EC.visibility_of_element_located((By.CLASS_NAME, 'ut-player-search-control'))
+                )
+                wait_for_shield_invisibility(self.driver)
 
-            self.driver.find_element(By.XPATH, '//div[contains(@class, "ut-player-search-control")]//input').click()
-            sleep(0.1)
-            self.driver.find_element(By.XPATH, '//div[contains(@class, "ut-player-search-control")]//input').send_keys(player)
+                self.driver.find_element(By.XPATH, '//div[contains(@class, "ut-player-search-control")]//input').click()
+                sleep(0.1)
+                self.driver.find_element(By.XPATH, '//div[contains(@class, "ut-player-search-control")]//input').send_keys(player)
 
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, '//ul[contains(@class, "playerResultsList")]/button'))
-            )
-            sleep(1)
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, '//ul[contains(@class, "playerResultsList")]/button'))
+                )
+                sleep(1)
 
-            self.driver.find_element(By.XPATH, '//ul[contains(@class, "playerResultsList")]/button').click()
+                self.driver.find_element(By.XPATH, '//ul[contains(@class, "playerResultsList")]/button').click()
 
-            self.driver.find_element(By.XPATH, '(//input[@class="numericInput"])[4]').click()
-            sleep(0.1)
-            self.driver.find_element(By.XPATH, '(//input[@class="numericInput"])[4]').send_keys(max_price)
+                self.driver.find_element(By.XPATH, '(//input[contains(@class, "numericInput")])[4]').click()
+                sleep(0.1)
+                self.driver.find_element(By.XPATH, '(//input[contains(@class, "numericInput")])[4]').clear()
+                self.driver.find_element(By.XPATH, '(//input[contains(@class, "numericInput")])[4]').send_keys(max_price)
 
-            print("Looking for " + player + " with max price " + str(max_price) + "...")
+                print("Looking for " + player + " with max price " + str(max_price) + "...")
 
-            self.search_player(player, max_price)
+                if self.search_player(player, max_price):
+                    break
 
-        except TimeoutException:
-            print("Error, check the browser")
-            self.read("Error, check the browser")
+            except TimeoutException:
+                print("Error, you have to wait some time, until the transfer market will be available again.")
+                print("Waiting 5 minutes...")
+                sleep(300)
+                continue
