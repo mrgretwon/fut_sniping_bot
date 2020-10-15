@@ -22,12 +22,11 @@ The bot stops working when you have no more money, or after 5 bought players (be
 
 The current status is described in the console logs, so you have real-time access to information about the activities performed.
 
-## Install requirements
+## Installation
 
 ```
 pip install -r requirements.txt
 ```
-Make sure you also have `mpg123` package installed.
 
 ## Configuration
 
@@ -61,22 +60,30 @@ PLAYER = {
 }
 ```
 
-You can turn on voice notification when you find a player.
-
-```
-ALLOW_NOTIFICATIONS = True
-```
-
 ## Running
+
+**Linux/Mac systems**
+
+Run:
 
 ```
 make run
 ```
 
+**Windows**
+
+Set the PYTHONPATH variable with the value of the code directory - [check this link](https://stackoverflow.com/questions/3701646/how-to-add-to-the-pythonpath-in-windows-so-it-finds-my-modules-packages).
+
+Run:
+
+```
+python src\main.py
+```
+
 
 ## Info
 
-Currently it works only Linux and Mac systems.
+Currently it works on Linux, Mac and Windows systems with Chrome version >=86.
 
 It's just first version of fut web app bot. The project will be further developed and new features will appear.
  

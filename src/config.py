@@ -1,5 +1,6 @@
 from selenium import webdriver
 import platform
+import os
 
 
 def create_driver():
@@ -9,6 +10,8 @@ def create_driver():
         path = 'chrome_mac/chromedriver'
     elif system == 'Linux':
         path = 'chrome_linux/chromedriver'
+    elif system == 'Windows':
+        path = os.getcwd() + '\chrome_windows\chromedriver.exe'
     else:
         raise OSError(f'Operating system {system} is not supported')
 
@@ -28,8 +31,8 @@ USER = {
 }
 
 PLAYER = {
-    "name": "ndombele",
-    "cost": 5500,
+    "name": "Kloster",
+    "cost": 20000,
 }
 
 EMAIL_CREDENTIALS = {
@@ -38,7 +41,5 @@ EMAIL_CREDENTIALS = {
 }
 
 EA_EMAIL = "EA@e.ea.com"
-
-ALLOW_NOTIFICATIONS = False
 
 INCREASE_COUNT = 20

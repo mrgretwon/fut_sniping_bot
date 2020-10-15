@@ -1,15 +1,13 @@
-import os
 from time import sleep
 
-from gtts import gTTS
 from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.action_chains import ActionChains
 
-from src.config import create_driver, ALLOW_NOTIFICATIONS, INCREASE_COUNT
 from src.config import URL
+from src.config import create_driver, INCREASE_COUNT
 from src.email_manager import get_access_code
 from src.helpers import wait_for_shield_invisibility
 
@@ -20,14 +18,6 @@ class Bot:
         self.action = ActionChains(self.driver)
         self.driver.get(URL)
         print("Starting sniping bot...")
-
-    @staticmethod
-    def read(text, language='en'):
-        if ALLOW_NOTIFICATIONS:
-            message = gTTS(text=text, lang=language, slow=False)
-            message.save("message.mp3")
-            os.system("mpg123 message.mp3")
-            os.system("rm message.mp3")
 
     def login(self, user):
         WebDriverWait(self.driver, 15).until(
@@ -107,7 +97,6 @@ class Bot:
                     print("Success! You bought " + player + " for " + str(price) + " coins.")
                     coins = new_coins
                     success_count += 1
-                    self.read("Success")
 
             try:
                 self.driver.find_element(By.XPATH, '//button[contains(@class, "ut-navigation-button-control")]').click()
@@ -162,4 +151,3 @@ class Bot:
 
         except TimeoutException:
             print("Error, check the browser")
-            self.read("Error, check the browser")
