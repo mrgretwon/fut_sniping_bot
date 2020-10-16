@@ -36,7 +36,7 @@ INCREASE_COUNT = 20
 
 LOGIN_MANUALLY = True
 
-# Credentials - fill if LOGIN_MANUALLY is False
+# Credentials - fill in if LOGIN_MANUALLY is False
 
 USER = {
     "email": "your_email@example.com",
