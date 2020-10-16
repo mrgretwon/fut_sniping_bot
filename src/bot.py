@@ -19,10 +19,11 @@ class Bot:
         self.driver.get(URL)
         print("Starting sniping bot...")
 
-    def login(self, user):
+    def go_to_login_page(self):
         WebDriverWait(self.driver, 15).until(
             EC.visibility_of_element_located((By.XPATH, '//*[@class="ut-login-content"]//button'))
         )
+        print("Logging in...")
         sleep(2)
         self.driver.find_element(By.XPATH, '//*[@class="ut-login-content"]//button').click()
 
@@ -30,7 +31,9 @@ class Bot:
             EC.visibility_of_element_located((By.ID, 'email'))
         )
 
-        print("Logging in...")
+    def login(self, user):
+        self.go_to_login_page()
+
         self.driver.find_element(By.ID, 'email').send_keys(user["email"])
         self.driver.find_element(By.ID, 'password').send_keys(user["password"])
         self.driver.find_element(By.ID, 'btnLogin').click()
@@ -45,6 +48,24 @@ class Bot:
         self.driver.find_element(By.ID, 'btnSubmit').click()
 
         WebDriverWait(self.driver, 30).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'icon-transfer'))
+        )
+        sleep(2)
+
+    def login_manually(self):
+        self.go_to_login_page()
+
+        print("Enter your account credentials and click login button.")
+        print("Waiting 5 minutes...")
+
+        WebDriverWait(self.driver, 300).until(
+            EC.element_to_be_clickable((By.ID, 'btnSendCode'))
+        ).click()
+
+        print("Provide EA access code and click submit button.")
+        print("Waiting 5 minutes...")
+
+        WebDriverWait(self.driver, 300).until(
             EC.visibility_of_element_located((By.CLASS_NAME, 'icon-transfer'))
         )
         sleep(2)
