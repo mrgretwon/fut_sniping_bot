@@ -1,23 +1,33 @@
 from time import sleep
 
+import atexit
+import random
+
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from src.config import URL
-from src.config import create_driver, INCREASE_COUNT
+from src.config import URL, INCREASE_COUNT
 from src.email_manager import get_access_code
-from src.helpers import wait_for_shield_invisibility
-
+from src.helpers import wait_for_shield_invisibility, create_driver
 
 class Bot:
     def __init__(self):
         self.driver = create_driver()
         self.action = ActionChains(self.driver)
         self.driver.get(URL)
+
+        atexit.register(self.cleanup)
         print("Starting sniping bot...")
+
+    def cleanup(self):
+        print("Running cleanup...")
+        self.quit()
+
+    def quit(self):
+        self.driver.quit()
 
     def go_to_login_page(self):
         WebDriverWait(self.driver, 15).until(
@@ -43,7 +53,6 @@ class Bot:
         ).click()
 
         access_code = get_access_code()
-
         self.driver.find_element(By.ID, 'oneTimeCode').send_keys(access_code)
         self.driver.find_element(By.ID, 'btnSubmit').click()
 
@@ -70,6 +79,13 @@ class Bot:
         )
         sleep(2)
 
+    def wait_for_login(self):
+        print("Waiting 5 minutes for Login...")
+        WebDriverWait(self.driver, 300).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, 'icon-transfer'))
+        )
+        sleep(2)
+
     def go_to_transfer_market(self):
         self.driver.find_element(By.CLASS_NAME, 'icon-transfer').click()
 
@@ -79,25 +95,33 @@ class Bot:
         sleep(1)
         self.driver.find_element(By.CLASS_NAME, 'ut-tile-transfer-market').click()
 
+    def get_coins(self):
+        return int(
+            self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text
+                .replace(" ", "")
+                .replace(".", "")
+                .replace(",", "")
+            )
+
     def search_player(self, player, max_price):
         count = 1
         success_count = 0
-        coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
-        print("Number of coins: " + coins)
+        coins = self.get_coins()
+        print("Number of coins: " + str(coins))
 
-        while int(coins) >= max_price and success_count < 5:
+        while coins >= max_price and success_count < 5:
             if count % INCREASE_COUNT == 0:
                 min_price_input = self.driver.find_element(By.XPATH, '(//input[contains(@class, "numericInput")])[3]')
                 min_price_input.click()
-                sleep(0.05)
                 min_price_input.send_keys(0)
 
             self.driver.find_element(By.XPATH, '(//*[@class="button-container"]/button)[2]').click()
             result = WebDriverWait(self.driver, 10).until(lambda d: d.find_elements(By.CLASS_NAME, 'no-results-icon') or
                                                                     d.find_elements(By.CLASS_NAME, 'DetailView'))[0]
 
+            # Buy a player when result appears
             if "DetailView" in result.get_attribute("class"):
-                coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
+                coins = self.get_coins()
 
                 try:
                     self.driver.find_element(By.XPATH, '//button[contains(@class, "buyButton")]').click()
@@ -106,15 +130,13 @@ class Bot:
                     self.driver.find_element(By.XPATH, '//button[contains(@class, "buyButton")]').click()
 
                 self.driver.find_element(By.XPATH, '//div[contains(@class,"view-modal-container")]//button').click()
+                sleep(random.randint(1, 9))
 
-                sleep(0.5)
-
-                new_coins = self.driver.find_element(By.CLASS_NAME, 'view-navbar-currency-coins').text.replace(" ", "")
-
-                if int(coins) == int(new_coins):
+                new_coins = self.get_coins()
+                if coins == new_coins:
                     print("Found something, but it was too late.")
                 else:
-                    price = int(coins) - int(new_coins)
+                    price = coins - new_coins
                     print("Success! You bought " + player + " for " + str(price) + " coins.")
                     coins = new_coins
                     success_count += 1
@@ -134,13 +156,13 @@ class Bot:
             wait_for_shield_invisibility(self.driver)
 
             inc_max_price_button.click()
-
             count += 1
+            sleep(random.randint(1, 9)/10)
 
         if success_count == 5:
             print("You bought 5 players. Assign them and rerun the bot.")
         else:
-            print("You have no coins for more players.")
+            print("You have not enought coins for more players.")
 
     def buy_player(self, player, max_price):
         try:
