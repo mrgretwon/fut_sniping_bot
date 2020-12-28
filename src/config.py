@@ -5,7 +5,8 @@ PLAYER = {
     "name": "Kloster",
     "cost": 15000,
 }
-INCREASE_COUNT = 20
+MAX_PLAYER = 5
+INCREASE_COUNT = 3
 
 # Credentials should be filled if LOGIN_MANUALLY is False
 # and USE_CHROME_PROFILE is False

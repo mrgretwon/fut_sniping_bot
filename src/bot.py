@@ -103,13 +103,13 @@ class Bot:
                 .replace(",", "")
             )
 
-    def search_player(self, player, max_price):
+    def search_player(self, player, max_price, max_player_count):
         count = 1
         success_count = 0
         coins = self.get_coins()
         print("Number of coins: " + str(coins))
 
-        while coins >= max_price and success_count < 5:
+        while coins >= max_price and success_count < max_player_count:
             if count % INCREASE_COUNT == 0:
                 min_price_input = self.driver.find_element(By.XPATH, '(//input[contains(@class, "numericInput")])[3]')
                 min_price_input.click()
@@ -159,12 +159,12 @@ class Bot:
             count += 1
             sleep(random.randint(1, 9)/10)
 
-        if success_count == 5:
-            print("You bought 5 players. Assign them and rerun the bot.")
+        if success_count == max_player_count:
+            print("You bought " + str(max_player_count) + " players. Assign them and rerun the bot.")
         else:
             print("You have not enought coins for more players.")
 
-    def buy_player(self, player, max_price):
+    def buy_players(self, player, max_price, max_player_count):
         try:
             self.go_to_transfer_market()
 
@@ -189,8 +189,7 @@ class Bot:
             self.driver.find_element(By.XPATH, '(//input[@class="numericInput"])[4]').send_keys(max_price)
 
             print("Looking for " + player + " with max price " + str(max_price) + "...")
-
-            self.search_player(player, max_price)
+            self.search_player(player, max_price, max_player_count)
 
         except TimeoutException:
             print("Error, check the browser")
