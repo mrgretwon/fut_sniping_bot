@@ -114,7 +114,7 @@ class Bot:
         wait_for_shield_invisibility(self.driver)
         sleep(random.randint(3, 9)/10)
 
-    def fill_transfer_search(self, player, max_price):
+    def fill_transfer_market_search(self, player, max_price):
         # set player name
         self.driver.find_element(By.XPATH, '//div[contains(@class, "ut-player-search-control")]//input').click()
         sleep(random.randint(3, 9)/10)
@@ -204,7 +204,7 @@ class Bot:
         try:
             self.go_to_transfer_market_search()
             sleep(random.randint(3, 9)/10)
-            self.fill_transfer_search(player, max_price)
+            self.fill_transfer_market_search(player, max_price)
             sleep(random.randint(3, 9)/10)
 
             # begin
@@ -231,6 +231,11 @@ class Bot:
 
                 count += 1
                 sleep(random.randint(3, 9)/10)
+
+            if success_count >= max_player_count:
+                print("You bought " + str(success_count) + " players. Assign them and rerun the bot.")
+            elif coins < max_price:
+                print("You have not enought coins for more players.")
 
         except TimeoutException:
             print("Error, check the browser")
