@@ -9,4 +9,4 @@ elif not USE_CHROME_PROFILE:
 else:
     bot.wait_for_login()
 
-bot.buy_players(PLAYER["name"], PLAYER["cost"], MAX_PLAYER)
+bot.buy_players(PLAYER["name"], PLAYER["rating"], PLAYER["cost"], MAX_PLAYER)
