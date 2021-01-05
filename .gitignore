@@ -1,3 +1,5 @@
 .idea
+chrome-user-data-dir
 *.pyc
+*.DS_Store
 __pycache__
